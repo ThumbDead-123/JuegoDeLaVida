@@ -82,6 +82,7 @@
                 }
             }
             cells = newCells;
+            setTimeout(applyRules, 100); // Llama a applyRules() cada 1000 milisegundos (1 segundo)
         }
 
         // Función para contar el número de vecinos vivos
@@ -112,13 +113,13 @@
         // Función de renderizado
         function render() {
             requestAnimationFrame(render);
-            applyRules();
             updateVisualization();
             renderer.render(scene, camera);
             controls.update();
         }
 
-        render();
+        applyRules(); // Comienza la simulación
+        render(); // Comienza el renderizado
     </script>
 </body>
 </html>
