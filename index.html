@@ -1,126 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>juego de la vida</title>
+    <title>Juego de la Vida</title>
     <style>
         body { margin: 0; }
-        canvas { display: block; }
+        
     </style>
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script>
-        // Parámetros del mundo
+        // Parametros mundo
 
-        const rows = 50;
-        const cols = 50;
-        const cellSize = 10;
+        const filas = 50;
+        const columnas = 50;
+        const tamanoCelda = 10;
 
-        //Inicio de las células (vivas o muertas)
-        let cells = generateRandomCells();
+        //Inicio de las celulas (vivas o muertas)
+        let celulas = generarCelulasAleatorias();
 
-        // Iniciando Three.js
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set((cols * cellSize) / 2, (rows * cellSize) / 2, 500);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        // -------------render----------
+        const escena = new THREE.Scene();
+        const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camara.position.set((columnas * tamanoCelda) / 2, (filas * tamanoCelda) / 2, 500);
+        const renderizador = new THREE.WebGLRenderer();
+        renderizador.setSize(window.innerWidth, window.innerHeight);
+        + 
 
-        // Controles de la cámara
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
+        document.body.appendChild(renderizador.domElement);
 
-        //  celdas
-        let cubes = [];
-        for (let i = 0; i < rows; i++) {
-            cubes[i] = [];
-            for (let j = 0; j < cols; j++) {
+        // -----------Controles de camara----------
+
+       
+
+        //  -----------celulas--------
+        let cubos = [];
+        for (let i = 0; i < filas; i++) {
+            cubos[i] = [];
+            for (let j = 0; j < columnas; j++) {
+
                 const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-                const cube = new THREE.Mesh(new THREE.BoxGeometry(cellSize, cellSize, cellSize), material);
-                cube.position.set(j * cellSize, i * cellSize, 0);
-                scene.add(cube);
-                cubes[i][j] = cube;
+                const cubo = new THREE.Mesh(new THREE.BoxGeometry(tamanoCelda, tamanoCelda, tamanoCelda), material);
+                cubo.position.set(j * tamanoCelda, i * tamanoCelda, 0);
+                escena.add(cubo);
+
+                cubos[i][j] = cubo;
             }
         }
 
-        // Función inicio aleatorio de células
-        function generateRandomCells() {
-            const randomCells = [];
-            for (let i = 0; i < rows; i++) {
-                randomCells[i] = [];
-                for (let j = 0; j < cols; j++) {
-                    randomCells[i][j] = Math.random() > 0.5 ? 1 : 0; // Cada célula tiene una probabilidad del 50% de estar viva
+        //----------funciones----------
+
+      
+        function generarCelulasAleatorias() {
+            const celulasAleatorias = [];
+
+            for (let i = 0; i < filas; i++) {
+
+                celulasAleatorias[i] = [];
+
+                for (let j = 0; j < columnas; j++) {
+
+                    celulasAleatorias[i][j] = Math.random() > 0.5 ? 1 : 0; 
                 }
             }
-            return randomCells;
+            return celulasAleatorias;
         }
 
-        // Función para aplicar las reglas del Juego de la Vida
-        function applyRules() {
-            const newCells = [];
-            for (let i = 0; i < rows; i++) {
-                newCells[i] = [];
-                for (let j = 0; j < cols; j++) {
-                    const neighbors = countNeighbors(i, j);
-                    if (cells[i][j] === 1) { // Célula viva
-                        if (neighbors < 2 || neighbors > 3) {
-                            newCells[i][j] = 0; // Muere por aislamiento o sobrepoblación
+
+        // -------------reglas del juego-----------------
+
+        function aplicarReglas() {
+            const nuevasCelulas = [];
+            for (let i = 0; i < filas; i++) {
+                nuevasCelulas[i] = [];
+
+                for (let j = 0; j < columnas; j++) {
+
+                    const vecinos = contarVecinos(i, j);
+
+                    if (celulas[i][j] === 1) {    // Celulas viva
+                        if (vecinos < 2 || vecinos > 3) {
+                            nuevasCelulas[i][j] = 0; // muere 
+
                         } else {
-                            newCells[i][j] = 1; // Vive
+                            nuevasCelulas[i][j] = 1;   // Vive
                         }
-                    } else { // Célula muerta
-                        if (neighbors === 3) {
-                            newCells[i][j] = 1; // Nace
+
+                        // Célula muerta
+                    } else {     
+                        if (vecinos === 3) {
+
+                            nuevasCelulas[i][j] = 1;   // Nace
+
                         } else {
-                            newCells[i][j] = 0; // Permanece muerta
+
+                            nuevasCelulas[i][j] = 0;   // sigue muerta
+
                         }
                     }
                 }
             }
-            cells = newCells;
-            setTimeout(applyRules, 100); // Llama a applyRules() cada 100 milisegundos (1 segundo)
+            celulas = nuevasCelulas;
+            setTimeout(aplicarReglas, 100); // Llama a aplicarReglas() cada 100 milisegundos (1 son 1000)
         }
 
-        // Función para contar el número de vecinos vivos
-        function countNeighbors(x, y) {
-            let count = 0;
+
+        // ---------- contar celulas vecinas vivas -------------
+        function contarVecinos(x, y) {
+
+            let contador = 0;
+
             for (let i = -1; i <= 1; i++) {
+
                 for (let j = -1; j <= 1; j++) {
-                    if (i === 0 && j === 0) continue; // Salta la celda en sí misma
-                    const neighborX = x + i;
-                    const neighborY = y + j;
-                    if (neighborX >= 0 && neighborX < rows && neighborY >= 0 && neighborY < cols) {
-                        count += cells[neighborX][neighborY];
+
+                    if (i === 0 && j === 0) continue; // Salta la celda 
+
+                    const vecinoX = x + i;
+                    const vecinoY = y + j;
+
+                    if (vecinoX >= 0 && vecinoX < filas && vecinoY >= 0 && vecinoY < columnas) {
+
+                        contador += celulas[vecinoX][vecinoY];
                     }
                 }
             }
-            return count;
+            return contador;
         }
 
-        // Función para actualizar la visualización
-        function updateVisualization() {
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    cubes[i][j].material.opacity = cells[i][j];
+
+        //  actualizar la visualización
+        function actualizarVisualizacion() {
+
+            for (let i = 0; i < filas; i++) {
+
+                for (let j = 0; j < columnas; j++) {
+
+                    cubos[i][j].material.opacity = celulas[i][j];
+
                 }
             }
         }
 
-        // Función de renderizado
-             function render() {
-                requestAnimationFrame(render);
-                updateVisualization();
-                renderer.render(scene, camera);
-                controls.update();
+
+        // renderizador
+        function renderizar() {      
+
+            requestAnimationFrame(renderizar);
+            actualizarVisualizacion();
+            renderizador.render(escena, camara);
+            controles.update();
+
         }
 
-        applyRules(); 
-        render(); 
+
+        aplicarReglas(); 
+        renderizar();   
     </script>
 </body>
 </html>
